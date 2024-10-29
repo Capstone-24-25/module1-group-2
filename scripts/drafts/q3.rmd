@@ -1,0 +1,162 @@
+---
+title: Question 3 Code
+author: Luke Dillon
+output: html_document
+---
+
+```{r echo=FALSE}
+library(tidyverse)
+library(infer)
+library(randomForest)
+library(tidymodels)
+library(modelr)
+library(yardstick)
+load("../../data/biomarker-clean.RData")
+```
+
+## Training/Testing Split
+```{r splitData}
+set.seed(101422)
+
+biomarker_split <- biomarker_clean %>%
+  initial_split(prop = 0.8)
+
+training_biomarker <- training(biomarker_split)
+testing_biomarker <- testing(biomarker_split)
+```
+
+Instead of splitting into training/testing at the end, we are doing it at the beginning. 
+Everything else will be run as it was in the in-class analysis except we will be using the training split 
+to run our t-tests and random forest.
+
+```{r tTests}
+test_fn <- function(.df) {
+  t_test(.df,
+    formula = level ~ group,
+    order = c("ASD", "TD"),
+    alternative = "two-sided",
+    var.equal = FALSE
+  )
+}
+
+ttests_out <- training_biomarker %>%
+  # drop ADOS score
+  select(-ados) %>%
+  # arrange in long format
+  pivot_longer(-group,
+    names_to = "protein",
+    values_to = "level"
+  ) %>%
+  # nest by protein
+  nest(data = c(level, group)) %>%
+  # compute t tests
+  mutate(ttest = map(data, test_fn)) %>%
+  unnest(ttest) %>%
+  # sort by p-value
+  arrange(p_value) %>%
+  # multiple testing correction
+  mutate(
+    m = n(),
+    hm = log(m) + 1 / (2 * m) - digamma(1),
+    rank = row_number(),
+    p.adj = m * hm * p_value / rank
+  )
+```
+
+```{r randForest}
+# store predictors and response separately
+predictors <- training_biomarker %>%
+  select(-c(group, ados))
+
+response <- training_biomarker %>%
+  pull(group) %>%
+  factor()
+
+# fit RF
+set.seed(101422)
+rf_out <- randomForest(
+  x = predictors,
+  y = response,
+  ntree = 1000,
+  importance = T
+)
+
+# check errors
+rf_out$confusion
+```
+
+## Selecting Variables
+
+```{r fuzzySelection}
+ttest_adjp <- ttests_out %>%
+  select(protein, p.adj)
+
+rforest_gini <- rf_out$importance %>%
+  as_tibble() %>%
+  mutate(protein = rownames(rf_out$importance)) %>%
+  select(protein, MeanDecreaseGini)
+
+protein_scores <- ttest_adjp %>%
+  left_join(rforest_gini, by = "protein")
+
+protein_scores <- protein_scores %>% mutate(
+  norm_gini = (MeanDecreaseGini - min(MeanDecreaseGini, na.rm = TRUE)) /
+    (max(MeanDecreaseGini, na.rm = TRUE) - min(MeanDecreaseGini, na.rm = TRUE)),
+  norm_pval = 1 - ((p.adj - min(p.adj, na.rm = TRUE)) /
+    (max(p.adj, na.rm = TRUE) - min(p.adj, na.rm = TRUE)))
+)
+
+protein_scores <- protein_scores %>%
+  mutate(combined_score = (norm_gini + norm_pval) / 2)
+
+proteins_sstar <- protein_scores %>%
+  slice_max(combined_score, n = 15) %>%
+  pull(protein)
+```
+
+I decided to try to merge the two variable importance results (p-adjusted, and gini index)
+I did this by putting them both in a tibble with their corresponding proteins
+and then min-max normalizing both of then so that the best p-value is 1 and the worst is 0
+fot the gini index the highest gini score is 1 and the lowest is 0
+
+Then I added these two normalized variables together and divided by two to get their combined score
+From this combined score, I selected an the top 15 (arbitrary number) proteins to use as predictors.
+
+Here are the selected variables:
+
+`r proteins_sstar`
+
+```{r logisticRegression}
+training_biomarker <- training_biomarker %>%
+  select(group, any_of(proteins_sstar)) %>%
+  mutate(class = (group == "ASD")) %>%
+  select(-group)
+
+testing_biomarker <- testing_biomarker %>%
+  select(group, any_of(proteins_sstar)) %>%
+  mutate(class = (group == "ASD")) %>%
+  select(-group)
+
+# fit logistic regression model to training set
+fit <- glm(class ~ .,
+  data = training_biomarker,
+  family = "binomial"
+)
+
+# evaluate errors on test set
+class_metrics <- metric_set(
+  sensitivity,
+  specificity,
+  accuracy,
+  roc_auc
+)
+
+testing_biomarker %>%
+  add_predictions(fit, type = "response") %>%
+  mutate(est = as.factor(pred > 0.5), tr_c = as.factor(class)) %>%
+  class_metrics(
+    estimate = est,
+    truth = tr_c, pred,
+    event_level = "second"
+  )
+```
