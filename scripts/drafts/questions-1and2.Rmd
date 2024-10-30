@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, include = F}
 # load the packages
 library(tidyverse)
 library(dplyr)
@@ -17,10 +17,20 @@ library(ggplot2)
 library(gridExtra)
 ```
 
-# 1. What do you imagine is the reason for log-transforming the protein levels in `biomarker-raw.csv`? (Hint: look at the distriution of raw values for a sample of proteins)
+### 1. What do you imagine is the reason for log-transforming the protein levels in `biomarker-raw.csv`? (Hint: look at the distriution of raw values for a sample of proteins)
 
 ```{r}
 # load the data
+var_names <- read_csv('../../data/biomarker-raw.csv', 
+                     col_names = F, 
+                     n_max = 2, 
+                     col_select = -(1:2)) %>%
+  t() %>%
+  as_tibble() %>%
+  rename(name = V1, 
+         abbreviation = V2) %>%
+  na.omit()
+
 biomarker_clean <- read_csv('../../data/biomarker-raw.csv', 
          skip = 2,
          col_select = -2L,
@@ -88,7 +98,7 @@ grid.arrange(p1, p2, p3, ncol = 3)
 After log transforming the data, it becomes much less skewed, which helps stabilize variance data and makes extreme values less influential. This transformation often "normalizes" the data, allowing for better model accuracy and interpretability. 
 
 
-# 2. Temporarily remove the outlier trimming from preprocessing and do some exploratory analysis of outlying values. Are there specific *subjects* (not values) that seem to be outliers? If so, are outliers more frequent in one group or the other? (Hint: consider tabulating the number of outlying values per subject.)
+### 2. Temporarily remove the outlier trimming from preprocessing and do some exploratory analysis of outlying values. Are there specific *subjects* (not values) that seem to be outliers? If so, are outliers more frequent in one group or the other? (Hint: consider tabulating the number of outlying values per subject.)
 
 ```{r, show_col_types=FALSE}
 # reload the data, but do not trim outliers
