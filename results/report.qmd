@@ -48,3 +48,35 @@ Task 3
 ### Improved classifier
 
 Task 4
+
+![](images/{EA2B8C34-FA72-4C73-94F7-576B52323F91}.png)
+
+Original Data
+
+\-\--
+
+![](images/Screenshot 2024-10-30 132806.png)
+
+Only partitioning training/testing data in the beginning
+
+Every metric was \<=, probably because the dataset has very few observations and splitting the data makes our data even smaller
+
+\-\--
+
+![](images/{288B04D4-E7AE-4BEE-98E0-6ADAF5EF8BFB}.png)
+
+Only using Variable selection using a fuzzy intersection (
+
+Every metric decreased by a substantial amount. There could be variables that have high t-test scores but low rf importance and still be selected. This implies the hard intersection being much better than the fuzzy intersection (i.e. normalizing and then summing importance / scores and picking the top 10 proteins).
+
+\-\--
+
+![](images/{92247D20-EE0F-44B1-8F73-0CB2ADD2446F}.png)
+
+Increasing the number of proteins increases every metric by a substantial amount (this was only increased to 15 proteins per test), but can be a result of overfitting.
+
+\-\--
+
+![](images/{E13BA343-E920-4393-8385-0397ADDB4875}.png)
+
+Every modification used, seems like every metric is slightly worse, but could be better at predicting new data.

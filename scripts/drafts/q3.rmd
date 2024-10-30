@@ -26,8 +26,9 @@ testing_biomarker <- testing(biomarker_split)
 ```
 
 Instead of splitting into training/testing at the end, we are doing it at the beginning. 
-Everything else will be run as it was in the in-class analysis except we will be using the training split 
-to run our t-tests and random forest.
+Everything else will be run as it was in the in-class analysis except we will be using the training split to run our t-tests and random forest.
+
+
 
 ```{r tTests}
 test_fn <- function(.df) {
@@ -38,7 +39,6 @@ test_fn <- function(.df) {
     var.equal = FALSE
   )
 }
-
 ttests_out <- training_biomarker %>%
   # drop ADOS score
   select(-ados) %>%
@@ -110,9 +110,11 @@ protein_scores <- protein_scores %>%
   mutate(combined_score = (norm_gini + norm_pval) / 2)
 
 proteins_sstar <- protein_scores %>%
-  slice_max(combined_score, n = 15) %>%
+  slice_max(combined_score, n = 10) %>%
   pull(protein)
 ```
+
+
 
 I decided to try to merge the two variable importance results (p-adjusted, and gini index)
 I did this by putting them both in a tibble with their corresponding proteins
