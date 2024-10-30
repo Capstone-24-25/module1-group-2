@@ -14,14 +14,9 @@ tidymodels_prefer()
 set.seed(1000)
 ```
 
-```{r, eval=FALSE}
-load('data/biomarker-clean.RData')
-write_csv(biomarker_clean, 'data/biomarker-clean.csv')
-```
-
 ```{r}
 setwd('C:/Users/Johnson Leung/Documents/GitHub/module1-group-2')
-biomarker_clean = read_csv('data/biomarker-clean.csv', show_col_types = FALSE)
+load('data/biomarker-clean.RData')
 
 biomarker = biomarker_clean %>% 
   select(-c(ados)) %>%
@@ -117,7 +112,7 @@ elastic_estimate = elastic_final_fit %>%
 
 rf_final_fit %>%
   extract_fit_engine() %>%
-  vip(num_feature = 50, aesthetics = list(fill = 'red4'))
+  vip(num_feature = 25, aesthetics = list(fill = 'red4'))
 
 #putting important variables into data frame
 rf_var = data.frame(term = names(rf_final_fit$fit$fit$fit$variable.importance), 
