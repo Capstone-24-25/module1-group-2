@@ -94,7 +94,7 @@ rf_var = data.frame(term = names(rf_final_fit$fit$fit$fit$variable.importance),
                     row.names = NULL) %>%
   arrange(-imp) %>%
   select(-imp) %>%
-  slice(1:50)
+  slice(1:10)
 
 elastic_var = elastic_estimate %>%
   select(term)
@@ -104,10 +104,10 @@ var_select = merge(rf_var, elastic_var) %>%
   list()
 
 #new recipe with common important variables only
-biomarker_small_recipe = recipe(group ~ `a2-Macroglobulin` + `Cystatin C` + 
-                                  DERM + FSTL1 + 
-                                  PEDF + `Protein S` + 
-                                  STAT3 + TFF3, 
+biomarker_small_recipe = recipe(group ~ `Calcineurin` + `Cystatin C` + 
+                                  FSTL1 + IgD + 
+                                  MAPK14 + MAPK2 + 
+                                  PPID + RELT, 
                                 data = biomarker_train) %>%
   step_normalize(all_predictors())
 
@@ -134,5 +134,5 @@ log_estimate = log_fit %>%
 #extracting accuracy
 acc = augment(log_fit, biomarker_test) %>% accuracy(group, .pred_class)
 
-# The model achieves an accuracy of 0.762 with 8 predictor proteins 
+# The model achieves an accuracy of 0.779 with 8 predictor proteins 
 # List of predictor proteins is stored as `var_select`
