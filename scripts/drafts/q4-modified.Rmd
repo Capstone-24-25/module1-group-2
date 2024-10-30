@@ -14,8 +14,13 @@ tidymodels_prefer()
 set.seed(1000)
 ```
 
+```{r, eval=FALSE}
+load('data/biomarker-clean.RData')
+write_csv(biomarker_clean, 'data/biomarker-clean.csv')
+```
+
 ```{r}
-#load('data/biomarker-clean.RData')
+biomarker_clean = read_csv('data/biomarker-clean.csv')
 
 biomarker = biomarker_clean %>% 
   select(-c(ados)) %>%
