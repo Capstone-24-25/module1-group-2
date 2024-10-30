@@ -20,7 +20,8 @@ write_csv(biomarker_clean, 'data/biomarker-clean.csv')
 ```
 
 ```{r}
-biomarker_clean = read_csv('data/biomarker-clean.csv')
+setwd('C:/Users/Johnson Leung/Documents/GitHub/module1-group-2')
+biomarker_clean = read_csv('data/biomarker-clean.csv', show_col_types = FALSE)
 
 biomarker = biomarker_clean %>% 
   select(-c(ados)) %>%
@@ -90,6 +91,7 @@ save(elastic_tune, file = 'data/elastic_tune.rda')
 ```
 
 ```{r}
+setwd('C:/Users/Johnson Leung/Documents/GitHub/module1-group-2')
 #loading in wf objects
 load('data/elastic_tune.rda')
 load('data/rf_tune.rda')
@@ -131,6 +133,7 @@ elastic_var = elastic_estimate %>%
 #finding intersection between the two models
 var_select = merge(rf_var, elastic_var) %>%
   list()
+var_select
 ```
 
 ```{r}
@@ -165,8 +168,8 @@ log_estimate = log_fit %>%
 #extracting accuracy
 acc = augment(log_fit, biomarker_test) %>% accuracy(group, .pred_class)
 
-
+acc
 ```
 
-The model achieves an accuracy of 0.779 with 8 predictor proteins.
+The model achieves an accuracy of 0.779 with 4 predictor proteins.
 List of predictor proteins is stored as `var_select`.
