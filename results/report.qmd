@@ -270,3 +270,18 @@ Using every modification, every metric is slightly worse, but could be better at
 ### Improved classifier
 
 Task 4
+
+Similar to the method in class, variable selection was done by fitting a random forest and an elastic net to the `biomarker` data. In order to ensure overfitting not being a problem, k-fold cross resampling was used for both data to tune the models. The panel of proteins was created by extracting all non-zero estimates from the elastic net and the top ten most important predictor variables from the random forest model and finding the intersection between the two. 
+
+```{r}
+#resulting panel of proteins
+load('images/var_select.rda')
+var_select
+```
+
+A logistic model was fitting using the four proteins. The accuracy of the logistic model was calculated by using the `yardstick` package on the testing data that was split at the front. The resulting accuracy rate is 0.779, which is higher then 0.753 achieved using the in class method.
+```{r}
+load('images/acc.rda')
+acc
+```
+
