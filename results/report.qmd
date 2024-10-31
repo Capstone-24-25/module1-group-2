@@ -193,15 +193,13 @@ By analyzing the outlying subjects in the study, it is clear that there are more
 
 Task 3
 
-### Improved classifier
-
-Task 4
-
 ![](images/%7BEA2B8C34-FA72-4C73-94F7-576B52323F91%7D.png)
 
 Original Data
 
 ------------------------------------------------------------------------
+
+#### Partitioning Training/Testing
 
 ![](images/Screenshot%202024-10-30%20132806.png)
 
@@ -211,13 +209,48 @@ Every metric was \<=, probably because the dataset has very few observations and
 
 ------------------------------------------------------------------------
 
+#### Fuzzy Selection
+
+```{r eval=FALSE}
+ttest_adjp <- ttests_out %>%
+  select(protein, p.adj)
+
+rforest_gini <- rf_out$importance %>%
+  as_tibble() %>%
+  mutate(protein = rownames(rf_out$importance)) %>%
+  select(protein, MeanDecreaseGini)
+
+protein_scores <- ttest_adjp %>%
+  left_join(rforest_gini, by = "protein")
+
+protein_scores <- protein_scores %>% mutate(
+  norm_gini = (MeanDecreaseGini - min(MeanDecreaseGini, na.rm = TRUE)) /
+    (max(MeanDecreaseGini, na.rm = TRUE) - min(MeanDecreaseGini, na.rm = TRUE)),
+  norm_pval = 1 - ((p.adj - min(p.adj, na.rm = TRUE)) /
+    (max(p.adj, na.rm = TRUE) - min(p.adj, na.rm = TRUE)))
+)
+
+protein_scores <- protein_scores %>%
+  mutate(combined_score = (norm_gini + norm_pval) / 2)
+
+proteins_sstar <- protein_scores %>%
+  slice_max(combined_score, n = 10) %>%
+  pull(protein)
+```
+
 ![](images/%7B288B04D4-E7AE-4BEE-98E0-6ADAF5EF8BFB%7D.png)
 
-Only using Variable selection using a fuzzy intersection (
+Only using Variable selection using a fuzzy intersection.
+
+Fuzzy Intersection: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini)
+We did this by min-max normalizing both of them and adding them together to get a combined score. 
+The top 10 protiens with the highest combined score were selected. (Code above)
 
 Every metric decreased by a substantial amount. There could be variables that have high t-test scores but low rf importance and still be selected. This implies the hard intersection being much better than the fuzzy intersection (i.e. normalizing and then summing importance / scores and picking the top 10 proteins).
 
 ------------------------------------------------------------------------
+
+#### More Selected Proteins
 
 ![](images/%7B92247D20-EE0F-44B1-8F73-0CB2ADD2446F%7D.png)
 
@@ -225,6 +258,12 @@ Increasing the number of proteins increases every metric by a substantial amount
 
 ------------------------------------------------------------------------
 
+#### All Methods Combined
+
 ![](images/%7BE13BA343-E920-4393-8385-0397ADDB4875%7D.png)
 
-Every modification used, seems like every metric is slightly worse, but could be better at predicting new data.
+Using every modification, every metric is slightly worse, but could be better at predicting new data.
+
+### Improved classifier
+
+Task 4

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
+<meta name="generator" content="quarto-1.6.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -31,10 +31,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="report_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="report_files/libs/quarto-html/anchor.min.js"></script>
 <link href="report_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="report_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="report_files/libs/quarto-html/quarto-syntax-highlighting-2486e1f0a3ee9ee1fc393803a1361cdb.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="report_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="report_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="report_files/libs/bootstrap/bootstrap-b0c8970b0f91f407811c33affdc6bd16.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -154,26 +154,39 @@ ul.task-list li input[type="checkbox"] {
 <section id="methodological-variations" class="level3">
 <h3 class="anchored" data-anchor-id="methodological-variations">Methodological variations</h3>
 <p>Task 3</p>
-</section>
-<section id="improved-classifier" class="level3">
-<h3 class="anchored" data-anchor-id="improved-classifier">Improved classifier</h3>
-<p>Task 4</p>
 <p><img src="images/%7BEA2B8C34-FA72-4C73-94F7-576B52323F91%7D.png" class="img-fluid"></p>
 <p>Original Data</p>
 <hr>
+<section id="partitioning-trainingtesting" class="level4">
+<h4 class="anchored" data-anchor-id="partitioning-trainingtesting">Partitioning Training/Testing</h4>
 <p><img src="images/Screenshot%202024-10-30%20132806.png" class="img-fluid"></p>
 <p>Only partitioning training/testing data in the beginning</p>
 <p>Every metric was &lt;=, probably because the dataset has very few observations and splitting the data makes our data even smaller</p>
 <hr>
+</section>
+<section id="fuzzy-selection" class="level4">
+<h4 class="anchored" data-anchor-id="fuzzy-selection">Fuzzy Selection</h4>
 <p><img src="images/%7B288B04D4-E7AE-4BEE-98E0-6ADAF5EF8BFB%7D.png" class="img-fluid"></p>
-<p>Only using Variable selection using a fuzzy intersection (</p>
+<p>Only using Variable selection using a fuzzy intersection.</p>
+<p>Fuzzy Intersection: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected. (Code above)</p>
 <p>Every metric decreased by a substantial amount. There could be variables that have high t-test scores but low rf importance and still be selected. This implies the hard intersection being much better than the fuzzy intersection (i.e.&nbsp;normalizing and then summing importance / scores and picking the top 10 proteins).</p>
 <hr>
+</section>
+<section id="more-selected-proteins" class="level4">
+<h4 class="anchored" data-anchor-id="more-selected-proteins">More Selected Proteins</h4>
 <p><img src="images/%7B92247D20-EE0F-44B1-8F73-0CB2ADD2446F%7D.png" class="img-fluid"></p>
 <p>Increasing the number of proteins increases every metric by a substantial amount (this was only increased to 15 proteins per test), but can be a result of overfitting.</p>
 <hr>
+</section>
+<section id="all-methods-combined" class="level4">
+<h4 class="anchored" data-anchor-id="all-methods-combined">All Methods Combined</h4>
 <p><img src="images/%7BE13BA343-E920-4393-8385-0397ADDB4875%7D.png" class="img-fluid"></p>
-<p>Every modification used, seems like every metric is slightly worse, but could be better at predicting new data.</p>
+<p>Using every modification, every metric is slightly worse, but could be better at predicting new data.</p>
+</section>
+</section>
+<section id="improved-classifier" class="level3">
+<h3 class="anchored" data-anchor-id="improved-classifier">Improved classifier</h3>
+<p>Task 4</p>
 </section>
 </section>
 
