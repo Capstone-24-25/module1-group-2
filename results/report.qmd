@@ -211,7 +211,12 @@ Every metric was \<=, probably because the dataset has very few observations and
 
 #### Fuzzy Selection
 
-```{r eval=FALSE}
+![](images/%7B288B04D4-E7AE-4BEE-98E0-6ADAF5EF8BFB%7D.png)
+
+```{r}
+#| echo: true
+#| eval: false
+
 ttest_adjp <- ttests_out %>%
   select(protein, p.adj)
 
@@ -237,8 +242,6 @@ proteins_sstar <- protein_scores %>%
   slice_max(combined_score, n = 10) %>%
   pull(protein)
 ```
-
-![](images/%7B288B04D4-E7AE-4BEE-98E0-6ADAF5EF8BFB%7D.png)
 
 Only using Variable selection using a fuzzy intersection.
 
