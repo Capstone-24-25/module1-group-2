@@ -115,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="abstract" class="level2">
 <h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
-<p>Write a brief one-paragraph abstract that describes the contents of your write-up.</p>
+<p>This report presents an analysis of a dataset from Hewiston et al.&nbsp;(2021). The study employs various statistical and machine learning methods, including t-tests, random forests, and logistic regression, to identify proteins with significant predictive power for ASD. In our analysis we explore different approaches that the study did not take. We investigate choices in the data such as why the protiens are on a logarithmic scale, we investigate outliers and where they occur. We use different variable selection and training/test splits. Finally, take a different approach to the prediction problem, and attempt to fit a better logistic regression model.</p>
 </section>
 <section id="dataset" class="level2">
 <h2 class="anchored" data-anchor-id="dataset">Dataset</h2>
@@ -127,7 +127,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="summary-of-published-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="summary-of-published-analysis">Summary of published analysis</h2>
-<p>Summarize the methodology of the paper in 1-3 paragraphs. You need not explain the methods in depth as we did in class; just indicate what methods were used and how they were combined. If possible, include a diagram that depicts the methodological design. (Quarto has support for <a href="https://quarto.org/docs/authoring/diagrams.html">GraphViz and Mermaid flowcharts</a>.) Provide key results: the proteins selected for the classifier and the estimated accuracy.</p>
 <p>Question One: We explored why the proteins were logged by simply by graphing the logged protein levels against their unlogged counterparts.</p>
 <p>Question Two: We defined outliers as being outside of 3 standard deviations from the mean of a given protein. We then tabulated these outliers to see the distribution of outliers among the “ASD” and “TD” groups.</p>
 <p>Question Three: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected.</p>
