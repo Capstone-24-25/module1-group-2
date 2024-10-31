@@ -37,6 +37,39 @@ The key variables in this study were the levels of each of these 1,125 proteins,
 
 Summarize the methodology of the paper in 1-3 paragraphs. You need not explain the methods in depth as we did in class; just indicate what methods were used and how they were combined. If possible, include a diagram that depicts the methodological design. (Quarto has support for [GraphViz and Mermaid flowcharts](https://quarto.org/docs/authoring/diagrams.html).) Provide key results: the proteins selected for the classifier and the estimated accuracy.
 
+Question One: We explored why the proteins were logged by simply by graphing the logged protein levels against their unlogged counterparts.
+
+Question Two: We defined outliers as being outside of 3 standard deviations from the mean of a given protein. We then tabulated these outliers to see the distribution of outliers among the "ASD" and "TD" groups.
+
+Question Three: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected.
+
+```{mermaid, width=600, height=400}
+graph TD
+    A[T-tests and Random Forest] --> B[Extract p-adjusted values]
+    A --> C[Extract MeanDecreaseGini values]
+    B --> D[Min-Max Normalize p-adjusted values]
+    C --> E[Min-Max Normalize MeanDecreaseGini values]
+    D --> F[Combine Normalized Scores]
+    E --> F[Combine Normalized Scores]
+    F --> G[Calculate Combined Score]
+    G --> I[Select Top 10 Proteins]
+```
+
+Question Four: Fit a random forest and an elastic net to the data. We then took the intersection of these two methods to get our selected variables. We put these variables into a logistic model
+
+```{mermaid, width=600, height=400}
+graph TD
+    A[Biomarker Data] --> B[Fit Random Forest]
+    A --> C[Fit Elastic Net]
+    B --> D[Extract Important Variables from Random Forest]
+    C --> E[Extract Important Variables from Elastic Net]
+    D --> F[Find Intersection of Selected Variables]
+    E --> F[Find Intersection of Selected Variables]
+    F --> G[Fit Logistic Model with Selected Variables]
+```
+
+The resulting accuracy rate is 0.779, which is higher then 0.753 achieved using the in class method. And the proteins selected were: "CK-MB", "DERM", "M2-PK", "Protein S"
+
 ## Findings
 
 ### Impact of preprocessing and outliers

@@ -69,6 +69,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="report_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="report_files/libs/bootstrap/bootstrap-67414a4df7840ca15799bb70c2c66528.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="report_files/libs/quarto-diagram/mermaid.min.js"></script>
+<script src="report_files/libs/quarto-diagram/mermaid-init.js"></script>
+<link href="report_files/libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
 </head>
@@ -125,6 +128,50 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="summary-of-published-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="summary-of-published-analysis">Summary of published analysis</h2>
 <p>Summarize the methodology of the paper in 1-3 paragraphs. You need not explain the methods in depth as we did in class; just indicate what methods were used and how they were combined. If possible, include a diagram that depicts the methodological design. (Quarto has support for <a href="https://quarto.org/docs/authoring/diagrams.html">GraphViz and Mermaid flowcharts</a>.) Provide key results: the proteins selected for the classifier and the estimated accuracy.</p>
+<p>Question One: We explored why the proteins were logged by simply by graphing the logged protein levels against their unlogged counterparts.</p>
+<p>Question Two: We defined outliers as being outside of 3 standard deviations from the mean of a given protein. We then tabulated these outliers to see the distribution of outliers among the “ASD” and “TD” groups.</p>
+<p>Question Three: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">graph TD
+    A[T-tests and Random Forest] --&gt; B[Extract p-adjusted values]
+    A --&gt; C[Extract MeanDecreaseGini values]
+    B --&gt; D[Min-Max Normalize p-adjusted values]
+    C --&gt; E[Min-Max Normalize MeanDecreaseGini values]
+    D --&gt; F[Combine Normalized Scores]
+    E --&gt; F[Combine Normalized Scores]
+    F --&gt; G[Calculate Combined Score]
+    G --&gt; I[Select Top 10 Proteins]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>Question Four: Fit a random forest and an elastic net to the data. We then took the intersection of these two methods to get our selected variables. We put these variables into a logistic model</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">graph TD
+    A[Biomarker Data] --&gt; B[Fit Random Forest]
+    A --&gt; C[Fit Elastic Net]
+    B --&gt; D[Extract Important Variables from Random Forest]
+    C --&gt; E[Extract Important Variables from Elastic Net]
+    D --&gt; F[Find Intersection of Selected Variables]
+    E --&gt; F[Find Intersection of Selected Variables]
+    F --&gt; G[Fit Logistic Model with Selected Variables]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>The resulting accuracy rate is 0.779, which is higher then 0.753 achieved using the in class method. And the proteins selected were: “CK-MB”, “DERM”, “M2-PK”, “Protein S”</p>
 </section>
 <section id="findings" class="level2">
 <h2 class="anchored" data-anchor-id="findings">Findings</h2>
@@ -135,7 +182,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="report_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="report_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -145,7 +192,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="report_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="report_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -247,6 +294,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="improved-classifier" class="level3">
 <h3 class="anchored" data-anchor-id="improved-classifier">Improved classifier</h3>
 <p>Task 4</p>
+<p>Similar to the method in class, variable selection was done by fitting a random forest and an elastic net to the <code>biomarker</code> data. In order to ensure overfitting not being a problem, k-fold cross resampling was used for both data to tune the models. The panel of proteins was created by extracting all non-zero estimates from the elastic net and the top ten most important predictor variables from the random forest model and finding the intersection between the two.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+       term
+1     CK-MB
+2      DERM
+3     M2-PK
+4 Protein S</code></pre>
+</div>
+</div>
+<p>A logistic model was fitting using the four proteins. The accuracy of the logistic model was calculated by using the <code>yardstick</code> package on the testing data that was split at the front. The resulting accuracy rate is 0.779, which is higher then 0.753 achieved using the in class method.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric  .estimator .estimate
+  &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;
+1 accuracy binary         0.779</code></pre>
+</div>
+</div>
 </section>
 </section>
 
