@@ -236,7 +236,7 @@ Original Data
 
 Only partitioning training/testing data in the beginning
 
-Every metric was \<=, probably because the dataset has very few observations and splitting the data makes our data even smaller
+Every metric was \<=, probably because the dataset has very few observations (154 observations, about 50/50 ASD and TD) and splitting the data made our data even smaller. This might still be a better model due to having testing data set apart and prevents overfitting. In this case, it might've made the model worse in terms of metrics but might be better at predicting future observations.
 
 ------------------------------------------------------------------------
 
@@ -276,9 +276,7 @@ proteins_sstar <- protein_scores %>%
 
 Only using Variable selection using a fuzzy intersection.
 
-Fuzzy Intersection: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini)
-We did this by min-max normalizing both of them and adding them together to get a combined score. 
-The top 10 protiens with the highest combined score were selected. (Code above)
+Fuzzy Intersection: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected. (Code above)
 
 Every metric decreased by a substantial amount. There could be variables that have high t-test scores but low rf importance and still be selected. This implies the hard intersection being much better than the fuzzy intersection (i.e. normalizing and then summing importance / scores and picking the top 10 proteins).
 
@@ -288,7 +286,7 @@ Every metric decreased by a substantial amount. There could be variables that ha
 
 ![](images/%7B92247D20-EE0F-44B1-8F73-0CB2ADD2446F%7D.png)
 
-Increasing the number of proteins increases every metric by a substantial amount (this was only increased to 15 proteins per test), but can be a result of overfitting.
+Increasing the number of proteins increases every metric by a substantial amount (this was only increased to 15 proteins per test), but can be a result of overfitting. However, this shows substantial increase in every metric, which other modifications have not shown. However, if we work on a much larger dataset, this might not be feasible since the sheer amount of computation power required just to add 1 variable will create a much more complicated model.
 
 ------------------------------------------------------------------------
 
@@ -296,13 +294,13 @@ Increasing the number of proteins increases every metric by a substantial amount
 
 ![](images/%7BE13BA343-E920-4393-8385-0397ADDB4875%7D.png)
 
-Using every modification, every metric is slightly worse, but could be better at predicting new data.
+Using every modification, every metric is slightly worse, but could be better at predicting new data. In this case, increasing the fuzzy selection variables did slightly make the predictions better, but still worse than our original model. This make sense since fuzzy selection might not be the best way to select variables in this case.
 
 ### Improved classifier
 
 Task 4
 
-Similar to the method in class, variable selection was done by fitting a random forest and an elastic net to the `biomarker` data. In order to ensure overfitting not being a problem, k-fold cross resampling was used for both data to tune the models. The panel of proteins was created by extracting all non-zero estimates from the elastic net and the top ten most important predictor variables from the random forest model and finding the intersection between the two. 
+Similar to the method in class, variable selection was done by fitting a random forest and an elastic net to the `biomarker` data. In order to ensure overfitting not being a problem, k-fold cross resampling was used for both data to tune the models. The panel of proteins was created by extracting all non-zero estimates from the elastic net and the top ten most important predictor variables from the random forest model and finding the intersection between the two.
 
 ```{r}
 #resulting panel of proteins
@@ -311,8 +309,8 @@ var_select
 ```
 
 A logistic model was fitting using the four proteins. The accuracy of the logistic model was calculated by using the `yardstick` package on the testing data that was split at the front. The resulting accuracy rate is 0.779, which is higher then 0.753 achieved using the in class method.
+
 ```{r}
 load('images/acc.rda')
 acc
 ```
-
