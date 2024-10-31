@@ -23,7 +23,7 @@ library(gridExtra)
 
 ## Abstract
 
-This report presents an analysis of a dataset from Hewiston et al. (2021). The study employs various statistical and machine learning methods, including t-tests, random forests, and logistic regression, to identify proteins with significant predictive power for ASD. In our analysis we explore different approaches that the study did not take. We investigate choices in the data such as why the protiens are on a logarithmic scale, we investigate outliers and where they occur. We use different variable selection and training/test splits. Finally, take a different approach to the prediction problem, and attempt to fit a better logistic regression model.
+This report presents an analysis of a dataset from Hewiston et al. (2021). The study employs various statistical and machine learning methods, including t-tests, random forests, and logistic regression, to identify proteins with significant predictive power for ASD. In our analysis we explore different approaches that the study did not take. We investigate choices in the data such as why the proteins are on a logarithmic scale, we investigate outliers and where they occur. We use different variable selection and training/test splits. Finally, take a different approach to the prediction problem, and attempt to fit a better logistic regression model.
 
 ## Dataset
 
@@ -39,7 +39,7 @@ Question One: We explored why the proteins were logged by simply by graphing the
 
 Question Two: We defined outliers as being outside of 3 standard deviations from the mean of a given protein. We then tabulated these outliers to see the distribution of outliers among the "ASD" and "TD" groups.
 
-Question Three: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected.
+Question Three: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 proteins with the highest combined score were selected.
 
 ```{mermaid, width=600, height=400}
 graph TD
@@ -72,7 +72,7 @@ The resulting accuracy rate is 0.779, which is higher then 0.753 achieved using 
 
 ### Impact of preprocessing and outliers
 
-Looking into why the researchers utilized log-trasnforms.
+Looking into why the researchers utilized log-transforms.
 
 ```{r, echo = F}
 var_names <- read_csv('../data/biomarker-raw.csv', 
@@ -198,7 +198,7 @@ outlying_subjects_95 = outlier_counts %>%
   filter(outlier_count > percentile_95)
 ```
 
-Let's take a look at how outlying subjects are distributed across the two groups at the 75th, 90th and 90th percentile of outliying proteins.
+Let's take a look at how outlying subjects are distributed across the two groups at the 75th, 90th and 90th percentile of outlying proteins.
 
 ```{r, echo = F}
 outlying_subjects_75 %>%
@@ -276,7 +276,7 @@ proteins_sstar <- protein_scores %>%
 
 Only using Variable selection using a fuzzy intersection.
 
-Fuzzy Intersection: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected. (Code above)
+Fuzzy Intersection: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 proteins with the highest combined score were selected. (Code above)
 
 Every metric decreased by a substantial amount. There could be variables that have high t-test scores but low rf importance and still be selected. This implies the hard intersection being much better than the fuzzy intersection (i.e. normalizing and then summing importance / scores and picking the top 10 proteins).
 

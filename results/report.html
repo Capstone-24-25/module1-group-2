@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Luke Dillon, Johnson Leung, Navin Lo, Edwin Yang">
-<meta name="dcterms.date" content="2024-10-30">
+<meta name="dcterms.date" content="2024-10-31">
 
 <title>Biomarkers of ASD</title>
 <style>
@@ -101,7 +101,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 30, 2024</p>
+      <p class="date">October 31, 2024</p>
     </div>
   </div>
   
@@ -113,7 +113,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="abstract" class="level2">
 <h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
-<p>This report presents an analysis of a dataset from Hewiston et al.&nbsp;(2021). The study employs various statistical and machine learning methods, including t-tests, random forests, and logistic regression, to identify proteins with significant predictive power for ASD. In our analysis we explore different approaches that the study did not take. We investigate choices in the data such as why the protiens are on a logarithmic scale, we investigate outliers and where they occur. We use different variable selection and training/test splits. Finally, take a different approach to the prediction problem, and attempt to fit a better logistic regression model.</p>
+<p>This report presents an analysis of a dataset from Hewiston et al.&nbsp;(2021). The study employs various statistical and machine learning methods, including t-tests, random forests, and logistic regression, to identify proteins with significant predictive power for ASD. In our analysis we explore different approaches that the study did not take. We investigate choices in the data such as why the proteins are on a logarithmic scale, we investigate outliers and where they occur. We use different variable selection and training/test splits. Finally, take a different approach to the prediction problem, and attempt to fit a better logistic regression model.</p>
 </section>
 <section id="dataset" class="level2">
 <h2 class="anchored" data-anchor-id="dataset">Dataset</h2>
@@ -127,7 +127,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="summary-of-published-analysis">Summary of published analysis</h2>
 <p>Question One: We explored why the proteins were logged by simply by graphing the logged protein levels against their unlogged counterparts.</p>
 <p>Question Two: We defined outliers as being outside of 3 standard deviations from the mean of a given protein. We then tabulated these outliers to see the distribution of outliers among the “ASD” and “TD” groups.</p>
-<p>Question Three: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected.</p>
+<p>Question Three: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 proteins with the highest combined score were selected.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -170,7 +170,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="findings">Findings</h2>
 <section id="impact-of-preprocessing-and-outliers" class="level3">
 <h3 class="anchored" data-anchor-id="impact-of-preprocessing-and-outliers">Impact of preprocessing and outliers</h3>
-<p>Looking into why the researchers utilized log-trasnforms.</p>
+<p>Looking into why the researchers utilized log-transforms.</p>
 <div class="cell" data-hash="report_cache/html/unnamed-chunk-4_258da344c5732feddd9446ff441cc9d2">
 <div class="cell-output-display">
 <p><img src="report_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
@@ -186,7 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="outlier-analysis" class="level4">
 <h4 class="anchored" data-anchor-id="outlier-analysis">Outlier Analysis</h4>
 <p>Let’s define an outlier as being outside of 3 standard deviations from the mean of a given protein. Take the sum of each protein for a given subject. An “outlier subject” would then be considered someone who is in the 75th percentile or higher in terms of number of outlying proteins in their panel.</p>
-<p>Let’s take a look at how outlying subjects are distributed across the two groups at the 75th, 90th and 90th percentile of outliying proteins.</p>
+<p>Let’s take a look at how outlying subjects are distributed across the two groups at the 75th, 90th and 90th percentile of outlying proteins.</p>
 <div class="cell" data-hash="report_cache/html/unnamed-chunk-8_b7a9d23d39b660b8d9f1ec0a8080f54d">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 2
@@ -260,7 +260,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(protein)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Only using Variable selection using a fuzzy intersection.</p>
-<p>Fuzzy Intersection: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 protiens with the highest combined score were selected. (Code above)</p>
+<p>Fuzzy Intersection: We tried to merge the two variable importance results (p-adjusted, and MeanDecreaseGini) We did this by min-max normalizing both of them and adding them together to get a combined score. The top 10 proteins with the highest combined score were selected. (Code above)</p>
 <p>Every metric decreased by a substantial amount. There could be variables that have high t-test scores but low rf importance and still be selected. This implies the hard intersection being much better than the fuzzy intersection (i.e.&nbsp;normalizing and then summing importance / scores and picking the top 10 proteins).</p>
 <hr>
 </section>
