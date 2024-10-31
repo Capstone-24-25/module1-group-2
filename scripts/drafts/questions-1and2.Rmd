@@ -1,0 +1,177 @@
+---
+title: "Questions 1 and 2: Outlier Analysis and EDA"
+author: "Navin Lo"
+date: "2024-10-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = F}
+# load the packages
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+```
+
+### 1. What do you imagine is the reason for log-transforming the protein levels in `biomarker-raw.csv`? (Hint: look at the distriution of raw values for a sample of proteins)
+
+```{r}
+# load the data
+var_names <- read_csv('../../data/biomarker-raw.csv', 
+                     col_names = F, 
+                     n_max = 2, 
+                     col_select = -(1:2)) %>%
+  t() %>%
+  as_tibble() %>%
+  rename(name = V1, 
+         abbreviation = V2) %>%
+  na.omit()
+
+biomarker_clean <- read_csv('../../data/biomarker-raw.csv', 
+         skip = 2,
+         col_select = -2L,
+         col_names = c('group', 
+                       'empty',
+                       pull(var_names, abbreviation),
+                       'ados'),
+         na = c('-', ''),
+         show_col_types = FALSE) %>%
+  filter(!is.na(group))
+
+head(biomarker_clean)
+```
+
+```{r}
+# plot individual proteins
+p1 <- ggplot(biomarker_clean, aes(x = CHIP)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "CHIP") +
+  theme_minimal()
+
+p2 <- ggplot(biomarker_clean, aes(x = CEBPB)) +
+  geom_histogram(bins = 30, fill = "orange", color = "black", alpha = 0.7) +
+  labs(title = "CEBPB") +
+  theme_minimal()
+
+p3 <- ggplot(biomarker_clean, aes(x = PIAS4)) +
+  geom_histogram(bins = 30, fill = "green", color = "black", alpha = 0.7) +
+  labs(title = "PIAS4") +
+  theme_minimal()
+
+# make it a grid
+grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+After investigating some of the protein levels in `biomarker-raw.csv`, the reason for log-transforming the data is to reduce the significant skew that each of these proteins comes with. As a result, it would be very difficult to perform any analysis on data this skewed. 
+
+```{r}
+# take the log, then look at the same proteins
+log_biomarker_clean = biomarker_clean %>%
+  mutate(across(.cols=-c(group, ados), ~ log10(.x)))
+```
+
+```{r}
+# plot individual proteins
+p1 <- ggplot(log_biomarker_clean, aes(x = CHIP)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "CHIP") +
+  theme_minimal()
+
+p2 <- ggplot(log_biomarker_clean, aes(x = CEBPB)) +
+  geom_histogram(bins = 30, fill = "orange", color = "black", alpha = 0.7) +
+  labs(title = "CEBPB") +
+  theme_minimal()
+
+p3 <- ggplot(log_biomarker_clean, aes(x = PIAS4)) +
+  geom_histogram(bins = 30, fill = "green", color = "black", alpha = 0.7) +
+  labs(title = "PIAS4") +
+  theme_minimal()
+
+# make it a grid
+grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+After log transforming the data, it becomes much less skewed, which helps stabilize variance data and makes extreme values less influential. This transformation often "normalizes" the data, allowing for better model accuracy and interpretability. 
+
+
+### 2. Temporarily remove the outlier trimming from preprocessing and do some exploratory analysis of outlying values. Are there specific *subjects* (not values) that seem to be outliers? If so, are outliers more frequent in one group or the other? (Hint: consider tabulating the number of outlying values per subject.)
+
+```{r, show_col_types=FALSE}
+# reload the data, but do not trim outliers
+clean_data_with_outliers <- read_csv('../../data/biomarker-raw.csv', 
+         skip = 2,
+         col_select = -2L,
+         col_names = c('group', 
+                       'empty',
+                       pull(var_names, abbreviation),
+                       'ados'),
+         na = c('-', ''),
+         show_col_types=FALSE) %>%
+  filter(!is.na(group)) %>%
+  # log transform, center, and scale without trimming
+  mutate(across(.cols = -c(group, ados), 
+                ~ scale(log10(.x))[, 1])) %>%
+  # reorder columns
+  select(group, ados, everything())
+```
+
+Defining an outlier as being outside of 3 standard deviations from the mean of a given protein. Take the sum of each protein for a given subject. 
+
+```{r}
+is_outlier <- function(x) {
+  abs(scale(x)) > 3 
+}
+
+# Apply the outlier detection process and count outliers for each subject
+outlier_counts <- clean_data_with_outliers %>%
+  # Flag outliers across all protein columns, excluding 'group' and 'ados'
+  mutate(across(.cols = -c(group, ados), ~ is_outlier(.x))) %>%
+  # Count the number of outliers per subject
+  rowwise() %>%
+  mutate(outlier_count = sum(c_across(-c(group, ados)))) %>%
+  ungroup() %>%
+  # Select relevant columns for viewing
+  select(group, outlier_count, ados)
+```
+
+"Outlier subject" is someone who is in the 75th percentile or greater in terms of number of outlying proteins.  
+
+```{r}
+percentile_75 = quantile(outlier_counts$outlier_count, 0.75)
+percentile_90 = quantile(outlier_counts$outlier_count, 0.9)
+percentile_95 = quantile(outlier_counts$outlier_count, 0.95)
+
+outlying_subjects_75 = outlier_counts %>%
+  filter(outlier_count > percentile_75)
+
+outlying_subjects_90 = outlier_counts %>%
+  filter(outlier_count > percentile_90)
+
+outlying_subjects_95 = outlier_counts %>%
+  filter(outlier_count > percentile_95)
+```
+
+```{r}
+outlying_subjects_75 %>%
+  group_by(group) %>%
+  summarize(count=n())
+```
+
+
+```{r}
+outlying_subjects_90 %>%
+  group_by(group) %>%
+  summarize(count=n())
+```
+
+```{r}
+outlying_subjects_95 %>%
+  group_by(group) %>%
+  summarize(count=n())
+```
+
+By analyzing the outlying subjects in the study, it is clear that there are more "outlier subjects" in the typical development group. 
